@@ -18,6 +18,7 @@
 \i deapp/de_snp_data_dataset_loc.sql
 \i deapp/de_snp_info.sql
 \i deapp/de_snp_gene_map.sql
+\i deapp/de_snp_info.sql
 \i deapp/de_snp_probe.sql
 \i deapp/de_snp_probe_sorted_def.sql
 \i deapp/de_snp_subject_sorted_def.sql
@@ -29,6 +30,7 @@
 \i deapp/de_subject_rbm_data.sql
 \i deapp/de_subject_rnaseq_data.sql
 \i deapp/de_subject_sample_mapping.sql
+\i deapp/de_subject_snp_dataset.sql
 \i deapp/de_variant_dataset.sql
 \i deapp/de_variant_population_data.sql
 \i deapp/de_variant_population_info.sql

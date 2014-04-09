@@ -17,7 +17,8 @@ def explodedWarDir    = catalinaBase + '/webapps/transmart'
 def solrPort          = 8080 //port of appserver where solr runs (under ctx path /solr)
 def searchIndex       = catalinaBase + '/searchIndex' //create this directory
 // for running transmart as WAR, create this directory and then create an alias
-// in tomcat or apache for serving the images here from <context path>/images/<RModules.imageURL>
+// old versions of transmart also require an alias in tomcat or apache from
+// to expose this directory as <context path>/images/<RModules.imageURL>
 // (usually transmart/images/tempImages)
 def jobsDirectory     = "/var/tmp/jobs/"
 
@@ -152,6 +153,7 @@ com.recomdata.plugins.resultSize = 5000
 
 /* {{{ RModules & Data Export Configuration */
 environments {
+    // This is not used in recent versions; the URL is always /analysisFiles/
     RModules.imageURL = "/tempImages/" //must end and start with /
 
     production {
@@ -162,8 +164,8 @@ environments {
         // Whether to copy the images from the jobs directory to another
         // directory from which they can be served. Should be false for
         // performance reasons. Files will be served from the
-        // tempFolderDirectory instead, which should be served under
-        // <context path>/tempImages
+        // tempFolderDirectory instead, which should be exposed as
+        // <context path>/analysisFiles (formerly: <context path>/tempImages)
         RModules.transferImageFile = false
 
         // Copy inside the exploded WAR. In actual production, we don't want this
@@ -205,7 +207,7 @@ grails.resources.adhoc.excludes = [ '/images' + RModules.imageURL + '**' ]
 
 /* {{{ Spring Security configuration */
 
-grails { plugins { springsecurity {
+grails { plugin { springsecurity {
     // You probably won't want to change these
 
     // customized user GORM class
@@ -219,7 +221,7 @@ grails { plugins { springsecurity {
     // request map GORM class name - request map is stored in the db
     requestMap.className = 'org.transmart.searchapp.Requestmap'
     // requestmap in db
-    securityConfigType = grails.plugins.springsecurity.SecurityConfigType.Requestmap
+    securityConfigType = grails.plugin.springsecurity.SecurityConfigType.Requestmap
     // url to redirect after login in
     successHandler.defaultTargetUrl = '/userLanding'
     // logout url
@@ -239,6 +241,7 @@ grails { plugins { springsecurity {
             '/login/**'                   : ['IS_AUTHENTICATED_ANONYMOUSLY'],
             '/css/**'                     : ['IS_AUTHENTICATED_ANONYMOUSLY'],
             '/js/**'                      : ['IS_AUTHENTICATED_ANONYMOUSLY'],
+            '/images/analysisFiles/**'    : ['IS_AUTHENTICATED_REMEMBERED'],
             '/images/**'                  : ['IS_AUTHENTICATED_ANONYMOUSLY'],
             '/static/**'                  : ['IS_AUTHENTICATED_ANONYMOUSLY'],
             '/search/loadAJAX**'          : ['IS_AUTHENTICATED_ANONYMOUSLY'],
@@ -253,6 +256,8 @@ grails { plugins { springsecurity {
             '/secureObjectPath/**'        : ['ROLE_ADMIN'],
             '/userGroup/**'               : ['ROLE_ADMIN'],
             '/secureObjectAccess/**'      : ['ROLE_ADMIN'],
+            '/oauth/authorize.dispatch'   : ['IS_AUTHENTICATED_REMEMBERED'],
+            '/oauth/token.dispatch'       : ['IS_AUTHENTICATED_REMEMBERED'],
             '/**'                         : ['IS_AUTHENTICATED_REMEMBERED'], // must be last
         ]
         rejectIfNoRule = true
@@ -270,6 +275,19 @@ grails { plugins { springsecurity {
     errors.login.locked          = 'Your account has been locked'
     errors.login.fail            = 'Login has failed; check the provided credentials'
     /* }}} */
+
+    providerNames = [
+        'daoAuthenticationProvider',
+        'anonymousAuthenticationProvider',
+        'rememberMeAuthenticationProvider',
+        'clientCredentialsAuthenticationProvider' //oauth
+    ]
+
+    oauthProvider {
+        clients = [
+                [clientId: 'api-client', clientSecret: 'api-client']
+        ]
+    }
 } } }
 
 /* }}} */
@@ -277,14 +295,8 @@ grails { plugins { springsecurity {
 //{{{ SAML Configuration
 org.transmart.security.samlEnabled = false
 
-grails.plugins.springsecurity.providerNames = [
-        'daoAuthenticationProvider',
-        'anonymousAuthenticationProvider',
-        'rememberMeAuthenticationProvider',
-        ]
-
 if (org.transmart.security.samlEnabled) {
-    grails.plugins.springsecurity.providerNames << 'samlAuthenticationProvider'
+    grails.plugin.springsecurity.providerNames << 'samlAuthenticationProvider'
 
     org.transmart.security.ssoEnabled = "true"
     // ID of the Service Provider
@@ -348,9 +360,9 @@ if (org.transmart.security.samlEnabled) {
     org.transmart.security.saml.sp.encryptionKeyAlias = "saml-encryption"
 
     // URL to redirect to after successful authentication
-    org.transmart.security.successRedirectHandler.defaultTargetUrl = grails.plugins.springsecurity.successHandler.defaultTargetUrl
+    org.transmart.security.successRedirectHandler.defaultTargetUrl = grails.plugin.springsecurity.successHandler.defaultTargetUrl
     // URL to redirect to after successful logout
-    org.transmart.security.successLogoutHandler.defaultTargetUrl = grails.plugins.springsecurity.logout.afterLogoutUrl
+    org.transmart.security.successLogoutHandler.defaultTargetUrl = grails.plugin.springsecurity.logout.afterLogoutUrl
 
     // Suffix of the login filter, saml authentication is initiated when user browses to this url
     org.transmart.security.saml.entryPoint.filterProcesses = "/saml/login"

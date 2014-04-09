@@ -30,3 +30,8 @@ CREATE TABLE i2b2 (
     i2b2_id bigint
 );
 
+--
+-- Name: i2b2_c_comment_char_length_idx; Type: INDEX; Schema: i2b2metadata; Owner: -
+--
+CREATE INDEX i2b2_c_comment_char_length_idx ON i2b2 USING btree (c_comment, char_length((c_fullname)::text));
+
