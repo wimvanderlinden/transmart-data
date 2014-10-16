@@ -447,6 +447,34 @@ com.recomdata.FmFolderService.importDirectory = fileImportDirectory.absolutePath
 }
 /* }}} */
 
+/* {{{ Sample Explorer configuration */
+//This is an object to dictate the names and 'pretty names' of the SOLR fields.
+// Optionally you can set the width of each of the columns when rendered.
+
+sampleExplorer {
+        fieldMapping = [
+                columns:[
+                        [header:'BioBank', dataIndex:'BioBank', mainTerm: true, showInGrid: true, width:50],
+                        [header:'Subject Treatment',dataIndex:'Subject_Treatment', mainTerm: true, showInGrid: true, width:50],
+                        [header:'Source Organism',dataIndex:'Source_Organism', mainTerm: true, showInGrid: true, width:50],
+                        [header:'Data Type',dataIndex:'DataType', mainTerm: true, showInGrid: true, width:40],
+                        [header:'ID',dataIndex:'id', mainTerm: true, showInGrid: false],
+                        [header:'Data Set',dataIndex:'DataSet', mainTerm: true, showInGrid: true, width:40],
+                        [header:'Pathology',dataIndex:'Pathology', mainTerm: true, showInGrid: true, width:60],
+                        [header:'Tissue',dataIndex:'Tissue', mainTerm: true, showInGrid: false],
+                        [header:'Sample Treatment',dataIndex:'Sample_Treatment', mainTerm: true, showInGrid: false]
+                ]
+        ]
+        resultsGridHeight = 600
+        resultsGridWidth = '100%'
+        idfield = 'id'
+}
+
+edu.harvard.transmart.sampleBreakdownMap = [
+    "id":"Aliquots in Cohort"
+]
+/* }}} */
+
 // I002 – Insertion point 'end'
 
 // vim: set fdm=marker et ts=4 sw=4 filetype=groovy ai:
